@@ -82,7 +82,7 @@ public abstract class CarouselStrategy {
    * @return A {@link KeylineState} to be used by the layout manager to offset and mask children
    *     along the scrolling axis.
    */
-  abstract KeylineState onFirstChildMeasuredWithMargins(
+  public abstract KeylineState onFirstChildMeasuredWithMargins(
       @NonNull Carousel carousel, @NonNull View child);
 
   /**
@@ -99,7 +99,7 @@ public abstract class CarouselStrategy {
    *     maskedSize}. 0F is fully unmasked and 1F is fully masked.
    */
   @FloatRange(from = 0F, to = 1F)
-  static float getChildMaskPercentage(float maskedSize, float unmaskedSize, float childMargins) {
+  public static float getChildMaskPercentage(float maskedSize, float unmaskedSize, float childMargins) {
     return 1F - ((maskedSize - childMargins) / (unmaskedSize - childMargins));
   }
 
@@ -109,7 +109,7 @@ public abstract class CarouselStrategy {
    * @param count the array containing numbers to be doubled
    * @return A new array that doubles each number in the original count array
    */
-  static int[] doubleCounts(int[] count) {
+  public static int[] doubleCounts(int[] count) {
     int[] doubledCount = new int[count.length];
     for (int i = 0; i < doubledCount.length; i++) {
       doubledCount[i] = count[i] * 2;

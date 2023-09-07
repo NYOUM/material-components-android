@@ -49,7 +49,7 @@ import java.util.List;
  * place focal keylines at the beginning of the scroll container, center-aligned strategies at
  * the center of the scroll container, etc.
  */
-final class KeylineState {
+public final class KeylineState {
 
   private final float itemSize;
   private final List<Keyline> keylines;
@@ -222,7 +222,7 @@ final class KeylineState {
    *
    * Typically there should be a keyline for every visible item in the scrolling container.
    */
-  static final class Builder {
+  public static final class Builder {
 
     private static final int NO_INDEX = -1;
     private static final float UNKNOWN_LOC = Float.MIN_VALUE;
@@ -251,7 +251,7 @@ final class KeylineState {
      *     carousel to measure and lay out all children, overriding each child's desired size.
      * @param availableSpace The available space of the carousel the keylines calculate cutoffs by.
      */
-    Builder(float itemSize, float availableSpace) {
+    public Builder(float itemSize, float availableSpace) {
       this.itemSize = itemSize;
       this.availableSpace = availableSpace;
     }
@@ -276,7 +276,7 @@ final class KeylineState {
      */
     @NonNull
     @CanIgnoreReturnValue
-    Builder addKeyline(
+    public Builder addKeyline(
         float offsetLoc,
         @FloatRange(from = 0.0F, to = 1.0F) float mask,
         float maskedItemSize,
@@ -292,7 +292,7 @@ final class KeylineState {
      */
     @NonNull
     @CanIgnoreReturnValue
-    Builder addKeyline(
+    public Builder addKeyline(
         float offsetLoc, @FloatRange(from = 0.0F, to = 1.0F) float mask, float maskedItemSize) {
       return addKeyline(offsetLoc, mask, maskedItemSize, false);
     }
@@ -324,7 +324,7 @@ final class KeylineState {
      */
     @NonNull
     @CanIgnoreReturnValue
-    Builder addKeyline(
+    public Builder addKeyline(
         float offsetLoc,
         @FloatRange(from = 0.0F, to = 1.0F) float mask,
         float maskedItemSize,
@@ -409,7 +409,7 @@ final class KeylineState {
      */
     @NonNull
     @CanIgnoreReturnValue
-    Builder addKeyline(
+    public Builder addKeyline(
         float offsetLoc,
         @FloatRange(from = 0.0F, to = 1.0F) float mask,
         float maskedItemSize,
@@ -451,7 +451,7 @@ final class KeylineState {
      */
     @NonNull
     @CanIgnoreReturnValue
-    Builder addAnchorKeyline(
+    public Builder addAnchorKeyline(
         float offsetLoc, @FloatRange(from = 0.0F, to = 1.0F) float mask, float maskedItemSize) {
       return addKeyline(
           offsetLoc, mask, maskedItemSize, /* isFocal= */ false, /* isAnchor= */ true);
@@ -466,7 +466,7 @@ final class KeylineState {
      */
     @NonNull
     @CanIgnoreReturnValue
-    Builder addKeylineRange(
+    public Builder addKeylineRange(
         float offsetLoc,
         @FloatRange(from = 0.0F, to = 1.0F) float mask,
         float maskedItemSize,
@@ -495,7 +495,7 @@ final class KeylineState {
      */
     @NonNull
     @CanIgnoreReturnValue
-    Builder addKeylineRange(
+    public Builder addKeylineRange(
         float offsetLoc,
         @FloatRange(from = 0.0F, to = 1.0F) float mask,
         float maskedItemSize,
@@ -515,7 +515,7 @@ final class KeylineState {
 
     /** Builds and returns a {@link KeylineState}. */
     @NonNull
-    KeylineState build() {
+    public KeylineState build() {
       if (tmpFirstFocalKeyline == null) {
         throw new IllegalStateException("There must be a keyline marked as focal.");
       }
@@ -551,7 +551,7 @@ final class KeylineState {
      * @param itemPosition the position of the item whose location is being calculated.
      * @return the location of the item at {@code position} if it were laid out end-to-end.
      */
-    private static float calculateKeylineLocationForItemPosition(
+    public  static float calculateKeylineLocationForItemPosition(
         float firstFocalLoc, float itemSize, int firstFocalPosition, int itemPosition) {
       return firstFocalLoc - (itemSize * firstFocalPosition) + (itemPosition * itemSize);
     }
@@ -561,7 +561,7 @@ final class KeylineState {
    * A data class that represents a state an item should be in when its center is at a position
    * along the scroll axis.
    */
-  static final class Keyline {
+  public static final class Keyline {
     final float loc;
     final float locOffset;
     final float mask;
@@ -598,7 +598,7 @@ final class KeylineState {
      *     not shift).
      * @param cutoff The amount by which the keyline item is cut off by the bounds of the carousel.
      */
-    Keyline(
+    public Keyline(
         float loc,
         float locOffset,
         float mask,

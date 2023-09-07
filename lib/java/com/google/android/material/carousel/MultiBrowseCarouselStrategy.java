@@ -82,7 +82,7 @@ public final class MultiBrowseCarouselStrategy extends CarouselStrategy {
 
   @Override
   @NonNull
-  KeylineState onFirstChildMeasuredWithMargins(@NonNull Carousel carousel, @NonNull View child) {
+  public KeylineState onFirstChildMeasuredWithMargins(@NonNull Carousel carousel, @NonNull View child) {
     float availableSpace = carousel.getContainerHeight();
     if (carousel.isHorizontal()) {
       availableSpace = carousel.getContainerWidth();

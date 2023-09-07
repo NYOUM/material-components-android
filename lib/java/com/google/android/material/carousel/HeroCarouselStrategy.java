@@ -52,7 +52,7 @@ public class HeroCarouselStrategy extends CarouselStrategy {
 
   @Override
   @NonNull
-  KeylineState onFirstChildMeasuredWithMargins(@NonNull Carousel carousel, @NonNull View child) {
+  public KeylineState onFirstChildMeasuredWithMargins(@NonNull Carousel carousel, @NonNull View child) {
     int availableSpace = carousel.getContainerHeight();
     if (carousel.isHorizontal()) {
       availableSpace = carousel.getContainerWidth();

@@ -42,7 +42,7 @@ public class FullScreenCarouselStrategy extends CarouselStrategy {
 
   @Override
   @NonNull
-  KeylineState onFirstChildMeasuredWithMargins(@NonNull Carousel carousel, @NonNull View child) {
+  public KeylineState onFirstChildMeasuredWithMargins(@NonNull Carousel carousel, @NonNull View child) {
     float availableSpace;
     LayoutParams childLayoutParams = (LayoutParams) child.getLayoutParams();
     float childMargins;

@@ -21,29 +21,32 @@ import static com.google.android.material.carousel.CarouselStrategy.getChildMask
 import static java.lang.Math.max;
 
 import android.content.Context;
+
 import androidx.annotation.NonNull;
+
 import com.google.android.material.carousel.CarouselLayoutManager.Alignment;
 
 /**
  * A helper class with utility methods for {@link CarouselStrategy} implementations.
  */
-final class CarouselStrategyHelper {
+public final class CarouselStrategyHelper {
 
-  private CarouselStrategyHelper() {}
+  public CarouselStrategyHelper() {
+  }
 
-  static float getExtraSmallSize(@NonNull Context context) {
+  public static float getExtraSmallSize(@NonNull Context context) {
     return context.getResources().getDimension(R.dimen.m3_carousel_gone_size);
   }
 
-  static float getSmallSizeMin(@NonNull Context context) {
+  public static float getSmallSizeMin(@NonNull Context context) {
     return context.getResources().getDimension(R.dimen.m3_carousel_small_item_size_min);
   }
 
-  static float getSmallSizeMax(@NonNull Context context) {
+  public static float getSmallSizeMax(@NonNull Context context) {
     return context.getResources().getDimension(R.dimen.m3_carousel_small_item_size_max);
   }
 
-  static KeylineState createKeylineState(
+  public static KeylineState createKeylineState(
       @NonNull Context context,
       float childMargins,
       float availableSpace,
@@ -58,14 +61,14 @@ final class CarouselStrategyHelper {
   /**
    * Gets the {@link KeylineState} associated with the given parameters.
    *
-   * @param context The context used to load resources.
+   * @param context                The context used to load resources.
    * @param childHorizontalMargins The child margins to use when calculating mask percentage.
-   * @param availableSpace the space that the {@link KeylineState} needs to fit.
-   * @param arrangement the {@link Arrangement} to translate into a {@link KeylineState}.
+   * @param availableSpace         the space that the {@link KeylineState} needs to fit.
+   * @param arrangement            the {@link Arrangement} to translate into a {@link KeylineState}.
    * @return the {@link KeylineState} associated with the arrangement with the lowest cost
    * according to the item count array priorities and how close it is to the target sizes.
    */
-  static KeylineState createLeftAlignedKeylineState(
+  public static KeylineState createLeftAlignedKeylineState(
       @NonNull Context context,
       float childHorizontalMargins,
       float availableSpace,
@@ -120,14 +123,14 @@ final class CarouselStrategyHelper {
    * Gets the {@link KeylineState} associated with the given parameters, with the focal item
    * in the center.
    *
-   * @param context The context used to load resources.
+   * @param context                The context used to load resources.
    * @param childHorizontalMargins The child margins to use when calculating mask percentage.
-   * @param availableSpace the space that the {@link KeylineState} needs to fit.
-   * @param arrangement the {@link Arrangement} to translate into a {@link KeylineState}.
+   * @param availableSpace         the space that the {@link KeylineState} needs to fit.
+   * @param arrangement            the {@link Arrangement} to translate into a {@link KeylineState}.
    * @return the {@link KeylineState} associated with the arrangement with the lowest cost
    * according to the item count array priorities and how close it is to the target sizes.
    */
-  static KeylineState createCenterAlignedKeylineState(
+  public static KeylineState createCenterAlignedKeylineState(
       @NonNull Context context,
       float childHorizontalMargins,
       float availableSpace,
@@ -233,7 +236,7 @@ final class CarouselStrategyHelper {
     return builder.build();
   }
 
-  static int maxValue(int[] array) {
+  public static int maxValue(int[] array) {
     int largest = Integer.MIN_VALUE;
     for (int j : array) {
       if (j > largest) {
@@ -248,7 +251,7 @@ final class CarouselStrategyHelper {
    * Helper method to calculate the keyline position of the start of the item block according to the
    * start position, item size, and item count.
    */
-  static float addStart(float start, float itemSize, int count) {
+  public static float addStart(float start, float itemSize, int count) {
     if (count > 0) {
       return start + itemSize / 2F;
     }
@@ -259,7 +262,7 @@ final class CarouselStrategyHelper {
    * Helper method to calculate the keyline position of the end of the item block according to the
    * start position, item size, and item count.
    */
-  static float addEnd(float startKeylinePos, float itemSize, int count) {
+  public static float addEnd(float startKeylinePos, float itemSize, int count) {
     return startKeylinePos + (max(0, count - 1) * itemSize);
   }
 
@@ -267,7 +270,7 @@ final class CarouselStrategyHelper {
    * Helper method to update the current position of the keyline calculations after the last keyline
    * in the item range.
    */
-  static float updateCurPosition(
+  public static float updateCurPosition(
       float curPosition, float lastEndKeyline, float itemSize, int count) {
     if (count > 0) {
       return lastEndKeyline + itemSize / 2F;
