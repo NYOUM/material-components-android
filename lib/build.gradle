@@ -263,7 +263,7 @@ afterEvaluate {
       maven {
         name "GitHubPackages"
 
-        url = uri("https://github.com/NYOUM/material-components-android")
+        url = uri("https://maven.pkg.github.com/NYOUM/material-components-android")
 
         credentials {
           username = getProperty("gpr.usr") ?: System.getenv("GPR_USER")
