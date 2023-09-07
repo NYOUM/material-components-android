@@ -261,7 +261,14 @@ afterEvaluate {
   publishing {
     repositories {
       maven {
-        url = "$mavenRepoUrl"
+        name "GitHubPackages"
+
+        url = uri("https://github.com/NYOUM/material-components-android")
+
+        credentials {
+          username = getProperty("gpr.usr") ?: System.getenv("GPR_USER")
+          password = getProperty("gpr.key") ?: System.getenv("GPR_API_KEY")
+        }
       }
     }
 
