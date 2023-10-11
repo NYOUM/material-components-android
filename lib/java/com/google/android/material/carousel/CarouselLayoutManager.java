@@ -18,9 +18,11 @@ package com.google.android.material.carousel;
 
 import com.google.android.material.R;
 
+import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 import static com.google.android.material.animation.AnimationUtils.lerp;
 import static java.lang.Math.abs;
 import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -129,6 +131,15 @@ public class CarouselLayoutManager extends LayoutManager
 
   /** Aligns large items to the center of the carousel. */
   public static final int ALIGNMENT_CENTER = 1;
+
+  private int lastItemCount;
+
+  /**
+   * An estimation of the current focused position, determined by which item center is closest to
+   * the first focal keyline. This is used when restoring item position after the carousel keylines
+   * are re-calculated due to configuration or size changes.
+   */
+  private int currentEstimatedPosition = NO_POSITION;
 
   /**
    * Determines where to align the large items in the carousel.
@@ -261,6 +272,7 @@ public class CarouselLayoutManager extends LayoutManager
     // Ensure our scroll limits are initialized and valid for the data set size.
     int startScroll = calculateStartScroll(keylineStateList);
     int endScroll = calculateEndScroll(state, keylineStateList);
+
     // Convert the layout-direction-aware offsets into min/max absolutes. These need to be in the
     // min/max format so they can be correctly passed to KeylineStateList and used to interpolate
     // between keyline states.
@@ -273,11 +285,16 @@ public class CarouselLayoutManager extends LayoutManager
       keylineStatePositionMap =
           keylineStateList.getKeylineStateForPositionMap(
               getItemCount(), minScroll, maxScroll, isLayoutRtl());
-    } else {
-      // Clamp the horizontal scroll offset by the new min and max by pinging the scroll by
-      // calculator with a 0 delta.
-      scrollOffset += calculateShouldScrollBy(0, scrollOffset, minScroll, maxScroll);
+      if (currentEstimatedPosition != NO_POSITION) {
+        scrollOffset =
+            getScrollOffsetForPosition(
+                currentEstimatedPosition, getKeylineStateForPosition(currentEstimatedPosition));
+      }
     }
+
+    // Clamp the horizontal scroll offset by the new min and max by pinging the scroll by
+    // calculator with a 0 delta.
+    scrollOffset += calculateShouldScrollBy(0, scrollOffset, minScroll, maxScroll);
 
     // Ensure currentFillStartPosition is valid if the number of items in the adapter has changed.
     currentFillStartPosition = MathUtils.clamp(currentFillStartPosition, 0, state.getItemCount());
@@ -286,6 +303,7 @@ public class CarouselLayoutManager extends LayoutManager
 
     detachAndScrapAttachedViews(recycler);
     fill(recycler, state);
+    lastItemCount = getItemCount();
   }
 
   private void recalculateKeylineStateList(Recycler recycler) {
@@ -365,13 +383,13 @@ public class CarouselLayoutManager extends LayoutManager
    * @param startPosition the adapter position from which to start adding views
    */
   private void addViewsStart(Recycler recycler, int startPosition) {
-    int start = calculateChildStartForFill(startPosition);
+    float start = calculateChildStartForFill(startPosition);
     for (int i = startPosition; i >= 0; i--) {
       ChildCalculations calculations = makeChildCalculations(recycler, start, i);
       if (isLocOffsetOutOfFillBoundsStart(calculations.offsetCenter, calculations.range)) {
         break;
       }
-      start = addStart(start, (int) currentKeylineState.getItemSize());
+      start = addStart(start, currentKeylineState.getItemSize());
 
       // If this child's start is beyond the end of the container, don't add the child but continue
       // to loop so we can eventually get to children that are within bounds.
@@ -392,13 +410,13 @@ public class CarouselLayoutManager extends LayoutManager
    * @param startPosition the adapter position from which to start adding views
    */
   private void addViewsEnd(Recycler recycler, State state, int startPosition) {
-    int start = calculateChildStartForFill(startPosition);
+    float start = calculateChildStartForFill(startPosition);
     for (int i = startPosition; i < state.getItemCount(); i++) {
       ChildCalculations calculations = makeChildCalculations(recycler, start, i);
       if (isLocOffsetOutOfFillBoundsEnd(calculations.offsetCenter, calculations.range)) {
         break;
       }
-      start = addEnd(start, (int) currentKeylineState.getItemSize());
+      start = addEnd(start, currentKeylineState.getItemSize());
 
       // If this child's end is beyond the start of the container, don't add the child but continue
       // to loop so we can eventually get to children that are within bounds.
@@ -473,11 +491,10 @@ public class CarouselLayoutManager extends LayoutManager
    * @return a {@link ChildCalculations} object
    */
   private ChildCalculations makeChildCalculations(Recycler recycler, float start, int position) {
-    float halfItemSize = currentKeylineState.getItemSize() / 2F;
     View child = recycler.getViewForPosition(position);
     measureChildWithMargins(child, 0, 0);
 
-    int center = addEnd((int) start, (int) halfItemSize);
+    float center = addEnd(start, currentKeylineState.getItemSize() / 2F);
     KeylineRange range =
         getSurroundingKeylineRange(currentKeylineState.getKeylines(), center, false);
 
@@ -517,7 +534,7 @@ public class CarouselLayoutManager extends LayoutManager
    */
   private boolean isLocOffsetOutOfFillBoundsStart(float locOffset, KeylineRange range) {
     float maskedSize = getMaskedItemSizeForLocOffset(locOffset, range);
-    int maskedEnd = addEnd((int) locOffset, (int) (maskedSize / 2F));
+    float maskedEnd = addEnd(locOffset, maskedSize / 2F);
     return isLayoutRtl() ? maskedEnd > getContainerSize() : maskedEnd < 0;
   }
 
@@ -540,7 +557,7 @@ public class CarouselLayoutManager extends LayoutManager
    */
   private boolean isLocOffsetOutOfFillBoundsEnd(float locOffset, KeylineRange range) {
     float maskedSize = getMaskedItemSizeForLocOffset(locOffset, range);
-    int maskedStart = addStart((int) locOffset, (int) (maskedSize / 2F));
+    float maskedStart = addStart(locOffset, maskedSize / 2F);
     return isLayoutRtl() ? maskedStart < 0 : maskedStart > getContainerSize();
   }
 
@@ -755,8 +772,7 @@ public class CarouselLayoutManager extends LayoutManager
     Keyline startFocalKeyline =
         isRtl ? startState.getLastFocalKeyline() : startState.getFirstFocalKeyline();
     float firstItemDistanceFromStart = getPaddingStart() * (isRtl ? 1 : -1);
-    int firstItemStart =
-        addStart((int) startFocalKeyline.loc, (int) (startState.getItemSize() / 2F));
+    float firstItemStart = addStart(startFocalKeyline.loc, startState.getItemSize() / 2F);
     return (int) (firstItemDistanceFromStart + getParentStart() - firstItemStart);
   }
 
@@ -773,19 +789,20 @@ public class CarouselLayoutManager extends LayoutManager
     float lastItemDistanceFromFirstItem =
         (((state.getItemCount() - 1) * endState.getItemSize()) + getPaddingEnd())
             * (isRtl ? -1F : 1F);
+
+    float endFocalLocDistanceFromStart = endFocalKeyline.loc - getParentStart();
+    float endFocalLocDistanceFromEnd = getParentEnd() - endFocalKeyline.loc;
+
     // We want the last item in the list to only be able to scroll to the end of the list. Subtract
     // the distance to the end focal keyline and then add the distance needed to let the last
     // item hit the center of the end focal keyline.
-    float endFocalLocDistanceFromStart = endFocalKeyline.loc - getParentStart();
-    float endFocalLocDistanceFromEnd = getParentEnd() - endFocalKeyline.loc;
-    if (abs(endFocalLocDistanceFromStart) > abs(lastItemDistanceFromFirstItem)) {
-      // The last item comes before the last focal keyline which means all items should be within
-      // the focal range and there is nowhere to scroll.
-      return 0;
-    }
+    int endScroll =
+        (int)
+            (lastItemDistanceFromFirstItem
+                - endFocalLocDistanceFromStart
+                + endFocalLocDistanceFromEnd);
 
-    return (int)
-        (lastItemDistanceFromFirstItem - endFocalLocDistanceFromStart + endFocalLocDistanceFromEnd);
+    return isRtl ? min(0, endScroll) : max(0, endScroll);
   }
 
   /**
@@ -798,11 +815,11 @@ public class CarouselLayoutManager extends LayoutManager
    * @param startPosition the adapter position of the item whose start position will be calculated
    * @return the start location of the view at {@code startPosition} along the scroll axis
    */
-  private int calculateChildStartForFill(int startPosition) {
+  private float calculateChildStartForFill(int startPosition) {
     float childScrollOffset = getParentStart() - scrollOffset;
     float positionOffset = currentKeylineState.getItemSize() * startPosition;
 
-    return addEnd((int) childScrollOffset, (int) positionOffset);
+    return addEnd(childScrollOffset, positionOffset);
   }
 
   /**
@@ -1013,12 +1030,12 @@ public class CarouselLayoutManager extends LayoutManager
   }
 
   /** Moves {@code value} towards the start of the container by {@code amount}. */
-  private int addStart(int value, int amount) {
+  private float addStart(float value, float amount) {
     return isLayoutRtl() ? value + amount : value - amount;
   }
 
   /** Moves {@code value} towards the end of the container by {@code amount}. */
-  private int addEnd(int value, int amount) {
+  private float addEnd(float value, float amount) {
     return isLayoutRtl() ? value - amount : value + amount;
   }
 
@@ -1126,6 +1143,7 @@ public class CarouselLayoutManager extends LayoutManager
 
   @Override
   public void scrollToPosition(int position) {
+    currentEstimatedPosition = position;
     if (keylineStateList == null) {
       return;
     }
@@ -1251,12 +1269,22 @@ public class CarouselLayoutManager extends LayoutManager
 
     float halfItemSize = currentKeylineState.getItemSize() / 2F;
     int startPosition = getPosition(getChildAt(0));
-    int start = calculateChildStartForFill(startPosition);
+    float start = calculateChildStartForFill(startPosition);
     Rect boundsRect = new Rect();
+    float firstFocalKeylineLoc =
+        isLayoutRtl()
+            ? currentKeylineState.getLastFocalKeyline().locOffset
+            : currentKeylineState.getFirstFocalKeyline().locOffset;
+    float absDistanceToFirstFocal = Float.MAX_VALUE;
     for (int i = 0; i < getChildCount(); i++) {
       View child = getChildAt(i);
-      offsetChild(child, start, halfItemSize, boundsRect);
-      start = addEnd(start, (int) currentKeylineState.getItemSize());
+      float offsetCenter = offsetChild(child, start, halfItemSize, boundsRect);
+      float distanceToFirstFocal = Math.abs(firstFocalKeylineLoc - offsetCenter);
+      if (child != null && distanceToFirstFocal < absDistanceToFirstFocal) {
+        absDistanceToFirstFocal = distanceToFirstFocal;
+        currentEstimatedPosition = getPosition(child);
+      }
+      start = addEnd(start, currentKeylineState.getItemSize());
     }
 
     // Fill any additional space caused by scrolling with more items.
@@ -1274,9 +1302,10 @@ public class CarouselLayoutManager extends LayoutManager
    *     after the child has been offset
    * @param halfItemSize half of the fully unmasked item size
    * @param boundsRect a Rect to use to find the current bounds of {@code child}
+   * @return the center in which the child is offset to
    */
-  private void offsetChild(View child, float startOffset, float halfItemSize, Rect boundsRect) {
-    int center = addEnd((int) startOffset, (int) halfItemSize);
+  private float offsetChild(View child, float startOffset, float halfItemSize, Rect boundsRect) {
+    float center = addEnd(startOffset, halfItemSize);
     KeylineRange range =
         getSurroundingKeylineRange(currentKeylineState.getKeylines(), center, false);
     float offsetCenter = calculateChildOffsetCenterForLocation(child, center, range);
@@ -1285,6 +1314,7 @@ public class CarouselLayoutManager extends LayoutManager
     super.getDecoratedBoundsWithMargins(child, boundsRect);
     updateChildMaskForLocation(child, center, range);
     orientationHelper.offsetChild(child, boundsRect, halfItemSize, offsetCenter);
+    return offsetCenter;
   }
 
   /**
@@ -1378,6 +1408,30 @@ public class CarouselLayoutManager extends LayoutManager
       orientationHelper = CarouselOrientationHelper.createOrientationHelper(this, orientation);
       refreshKeylineState();
     }
+  }
+
+  @Override
+  public void onItemsAdded(@NonNull RecyclerView recyclerView, int positionStart, int itemCount) {
+    super.onItemsAdded(recyclerView, positionStart, itemCount);
+    updateItemCount();
+  }
+
+  @Override
+  public void onItemsRemoved(@NonNull RecyclerView recyclerView, int positionStart, int itemCount) {
+    super.onItemsRemoved(recyclerView, positionStart, itemCount);
+    updateItemCount();
+  }
+
+  private void updateItemCount() {
+    int newItemCount = getItemCount();
+
+    if (newItemCount == this.lastItemCount || keylineStateList == null) {
+      return;
+    }
+    if (carouselStrategy.shouldRefreshKeylineState(this, this.lastItemCount)) {
+      refreshKeylineState();
+    }
+    this.lastItemCount = newItemCount;
   }
 
   /**

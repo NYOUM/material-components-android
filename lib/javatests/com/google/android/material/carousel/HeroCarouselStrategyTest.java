@@ -18,6 +18,7 @@ package com.google.android.material.carousel;
 import com.google.android.material.test.R;
 
 import static com.google.android.material.carousel.CarouselHelper.createCarousel;
+import static com.google.android.material.carousel.CarouselHelper.createCarouselWithItemCount;
 import static com.google.android.material.carousel.CarouselHelper.createCarouselWithWidth;
 import static com.google.android.material.carousel.CarouselHelper.createViewWithSize;
 import static com.google.common.truth.Truth.assertThat;
@@ -76,6 +77,23 @@ public class HeroCarouselStrategyTest {
         .isGreaterThan((float) carousel.getContainerWidth());
     assertThat(keylineState.getKeylines().get(1).mask).isEqualTo(0F);
     assertThat(keylineState.getKeylines().get(2).maskedItemSize).isEqualTo(minSmallItemSize);
+  }
+
+  @Test
+  public void testSmallContainer_shouldShowOneLargeItem() {
+    View view = createViewWithSize(ApplicationProvider.getApplicationContext(), 100, 400);
+    float minSmallItemSize =
+        view.getResources().getDimension(R.dimen.m3_carousel_small_item_size_min);
+    // Create a carousel that will not fit a large and small item where the large item is at least
+    // as big as the min small item.
+    int carouselWidth = (int) (minSmallItemSize * 1.5f);
+    Carousel carousel = createCarouselWithWidth(carouselWidth);
+
+    HeroCarouselStrategy config = new HeroCarouselStrategy();
+    KeylineState keylineState = config.onFirstChildMeasuredWithMargins(carousel, view);
+
+    assertThat(keylineState.getKeylines()).hasSize(3);
+    assertThat(keylineState.getKeylines().get(1).maskedItemSize).isEqualTo((float) carouselWidth);
   }
 
   @Test
@@ -149,7 +167,7 @@ public class HeroCarouselStrategyTest {
             ApplicationProvider.getApplicationContext(), (int) largeSize, (int) largeSize);
     int carouselSize = (int) (largeSize + smallSize * 2);
 
-    MultiBrowseCarouselStrategy strategy = new MultiBrowseCarouselStrategy();
+    HeroCarouselStrategy strategy = new HeroCarouselStrategy();
     List<Keyline> keylines =
         strategy.onFirstChildMeasuredWithMargins(
             createCarousel(
@@ -158,6 +176,37 @@ public class HeroCarouselStrategyTest {
                 CarouselLayoutManager.ALIGNMENT_CENTER), view).getKeylines();
 
     float[] locOffsets = new float[] {-.5F, 20F, 100F, 180F, 200.5F};
+
+    for (int i = 0; i < keylines.size(); i++) {
+      assertThat(keylines.get(i).locOffset).isEqualTo(locOffsets[i]);
+    }
+  }
+
+  @Test
+  public void testCenterAlignment_isLeftAlignedWithMinItems() {
+    float largeSize = 40F * 3; // 120F
+    float smallSize = 40F;
+
+    View view =
+        createViewWithSize(
+            ApplicationProvider.getApplicationContext(), (int) largeSize, (int) largeSize);
+    int carouselSize = (int) (largeSize + smallSize * 2);
+
+    HeroCarouselStrategy strategy = new HeroCarouselStrategy();
+    List<Keyline> keylines =
+        strategy
+            .onFirstChildMeasuredWithMargins(
+                createCarouselWithItemCount(
+                    carouselSize, CarouselLayoutManager.ALIGNMENT_CENTER, 2),
+                view)
+            .getKeylines();
+
+    float minSmallItemSize =
+        view.getResources().getDimension(R.dimen.m3_carousel_small_item_size_min);
+
+    // keylines when there are only 2 items is {xsmall, large, small, xsmall}
+    float[] locOffsets =
+        new float[] {-.5F, (200 - minSmallItemSize) / 2F, 200 - minSmallItemSize / 2F, 200.5F};
 
     for (int i = 0; i < keylines.size(); i++) {
       assertThat(keylines.get(i).locOffset).isEqualTo(locOffsets[i]);

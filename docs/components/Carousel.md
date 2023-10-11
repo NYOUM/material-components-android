@@ -86,7 +86,7 @@ Next, set your `RecyclerView`s layout manager to a new `CarouselLayoutManager`.
   android:clipToPadding="false" />
 ```
 
-```kotlin
+```kt
 carouselRecyclerView.setLayoutManager(CarouselLayoutManager())
 ```
 
@@ -114,7 +114,7 @@ by medium and small items, depending on the size of the `RecyclerView`
 container.
 
 You can use the multi-browse strategy by passing in no arguments to the
-CarouselLayoutManager constructor: `new CarouselLayoutManager()`.
+CarouselLayoutManager constructor: `CarouselLayoutManager()`.
 
 ## Hero strategy
 
@@ -140,14 +140,13 @@ carousels with `match_parent` as the width will have more and more large items
 as the screen size grows.
 
 You can use the hero strategy by passing in the strategy to the
-CarouselLayoutManager constructor: `new CarouselLayoutManager(new
-HeroStrategy())`.
+CarouselLayoutManager constructor: `CarouselLayoutManager(HeroCarouselStrategy())`.
 
 With the hero strategy, it is recommended to use the `CarouselSnapHelper` to snap to the nearest item like so:
 
-```
-SnapHelper snapHelper = new CarouselSnapHelper();
-snapHelper.attachToRecyclerView(carouselRecyclerView);
+```kt
+val snapHelper = CarouselSnapHelper()
+snapHelper.attachToRecyclerView(carouselRecyclerView)
 ```
 
 ## Fullscreen strategy
@@ -158,12 +157,11 @@ A fullscreen strategy shows one item at a time that takes up the entire space
 of the carousel.
 
 You can use the fullscreen strategy by passing in the strategy to the
-CarouselLayoutManager constructor: `new CarouselLayoutManager(new
-FullScreenStrategy())`.
+CarouselLayoutManager constructor: `CarouselLayoutManager(FullScreenCarouselStrategy())`.
 
 With the fullscreen strategy, it is recommended to use a vertical orientation
 carousel by either setting the orientation on the CarouselLayoutManager with the
-setter, or through its constructor: `new CarouselLayoutManager(new
+setter, or through its constructor: `CarouselLayoutManager(
 FullScreenCarouselStrategy(), RecyclerView.VERTICAL)`. Stick to portrait
 orientation only, or adapt your layout to a different strategy when using
 landscape in order to maintain the aspect ratios of your images.
@@ -171,18 +169,29 @@ landscape in order to maintain the aspect ratios of your images.
 It is also recommended to use the `CarouselSnapHelper`
 to snap to the nearest item like so:
 
-```
-SnapHelper snapHelper = new CarouselSnapHelper();
-snapHelper.attachToRecyclerView(carouselRecyclerView);
+```kt
+val snapHelper = CarouselSnapHelper()
+snapHelper.attachToRecyclerView(carouselRecyclerView)
 ```
 
-It is also recommended to use the `CarouselSnapHelper`
-to snap to the nearest item like so:
+## Uncontained strategy
 
-```
-SnapHelper snapHelper = new CarouselSnapHelper();
-snapHelper.attachToRecyclerView(carouselRecyclerView);
-```
+![An uncontained Carousel](assets/carousel/uncontained.png)
+
+An uncontained strategy fits as many items as possible into the carousel without
+altering the item size. With the remaining space, it fits one item that is
+the smallest it can be to fill the space but still gets cut off in a
+way such that there is a visible effect of items getting smaller as it goes out
+of the carousel bounds.
+
+You can use the uncontained strategy by passing in the strategy to the
+CarouselLayoutManager constructor: `CarouselLayoutManager(UncontainedCarouselStrategy())`.
+
+As the uncontained strategy does not alter item sizes, it is ideal for use cases
+where aspect ratios of the items must be maintained. However, this can lead to
+aesthetically displeasing layouts when the carousel size is almost perfectly
+divisible by the item size, so it is advised to update the item sizes based on
+the carousel size.
 
 ## Attributes
 
@@ -211,13 +220,12 @@ by setting an
 [`onMaskChangedListener`](https://developer.android.com/reference/com/google/android/material/carousel/OnMaskChangedListener)
 on your `MaskableFrameLayout` inside your `RecyclerView.ViewHolder`.
 
-```kotlin
-(viewHolder.itemView as MaskableFrameLayout).setOnMaskChangedListener(
+```kt
+(viewHolder.itemView as MaskableFrameLayout).setOnMaskChangedListener {
     maskRect ->
       // Any custom motion to run when mask size changes
-      viewHolder.title.setTranslationX(maskRect.left);
-      viewHolder.title.setAlpha(lerp(1F, 0F, 0F, 80F, maskRect.left));
-    );
+      viewHolder.title.setTranslationX(maskRect.left)
+      viewHolder.title.setAlpha(lerp(1F, 0F, 0F, 80F, maskRect.left))
 }
 ```
 
@@ -227,7 +235,7 @@ In the example above, a title is translated so it appears pinned to the left mas
 
 You can control the alignment of the focal (large) items in the carousel by setting the `app:carousel_alignment` attribute on your RecyclerView, if you are also setting the RecyclerView's LayoutManager through `app:layoutManager`:
 
-```
+```xml
     <androidx.recyclerview.widget.RecyclerView
       ...
       app:layoutManager="com.google.android.material.carousel.CarouselLayoutManager"
@@ -237,8 +245,8 @@ You can control the alignment of the focal (large) items in the carousel by sett
 
 If CarouselLayoutManager is being set programmatically, you may set the alignment as well programmatically:
 
-```
-carouselLayoutManager.setCarouselAlignment(CarouselLayoutManager.CENTER);
+```kt
+carouselLayoutManager.setCarouselAlignment(CarouselLayoutManager.CENTER)
 ```
 
 By default, the focal alignment is start-aligned.
