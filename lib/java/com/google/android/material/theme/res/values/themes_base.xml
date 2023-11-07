@@ -95,11 +95,12 @@
     <item name="colorPrimaryVariant">?attr/colorPrimary</item>
     <item name="colorSecondaryVariant">?attr/colorSecondary</item>
 
-    <!-- Dialog themes. -->
+    <!-- Dialog themes and scrim. -->
     <item name="alertDialogTheme">@style/ThemeOverlay.Material3.Dialog.Alert</item>
     <item name="bottomSheetDialogTheme">@style/ThemeOverlay.Material3.BottomSheetDialog</item>
     <item name="materialAlertDialogTheme">@style/ThemeOverlay.Material3.MaterialAlertDialog</item>
     <item name="sideSheetDialogTheme">@style/ThemeOverlay.Material3.SideSheetDialog</item>
+    <item name="android:backgroundDimAmount">@dimen/m3_comp_scrim_container_opacity</item>
 
     <!-- Picker styles and themes. -->
     <item name="materialCalendarStyle">@style/Widget.Material3.MaterialCalendar</item>
@@ -281,7 +282,6 @@
 
     <!-- Theme overlays. -->
     <item name="dynamicColorThemeOverlay">@style/ThemeOverlay.Material3.DynamicColors.Light</item>
-    <item name="contrastColorThemeOverlay">@style/ThemeOverlay.Material3.DynamicColors.Contrast.Light</item>
   </style>
 
   <style name="Base.V14.Theme.Material3.Dark" parent="Theme.MaterialComponents">
@@ -360,11 +360,12 @@
     <item name="colorPrimaryVariant">?attr/colorPrimary</item>
     <item name="colorSecondaryVariant">?attr/colorSecondary</item>
 
-    <!-- Dialog themes. -->
+    <!-- Dialog themes and scrim. -->
     <item name="alertDialogTheme">@style/ThemeOverlay.Material3.Dialog.Alert</item>
     <item name="bottomSheetDialogTheme">@style/ThemeOverlay.Material3.BottomSheetDialog</item>
     <item name="materialAlertDialogTheme">@style/ThemeOverlay.Material3.MaterialAlertDialog</item>
     <item name="sideSheetDialogTheme">@style/ThemeOverlay.Material3.SideSheetDialog</item>
+    <item name="android:backgroundDimAmount">@dimen/m3_comp_scrim_container_opacity</item>
 
     <!-- Picker styles and themes. -->
     <item name="materialCalendarStyle">@style/Widget.Material3.MaterialCalendar</item>
@@ -546,7 +547,6 @@
 
     <!-- Theme overlays. -->
     <item name="dynamicColorThemeOverlay">@style/ThemeOverlay.Material3.DynamicColors.Dark</item>
-    <item name="contrastColorThemeOverlay">@style/ThemeOverlay.Material3.DynamicColors.Contrast.Dark</item>
   </style>
 
   <style name="Base.Theme.Material3.Light" parent="Base.V14.Theme.Material3.Light"/>
